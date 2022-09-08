@@ -17,7 +17,7 @@ import (
 //and also save after the delete
 type Todo struct {
 	//and if you set the strtuct at ID to string and adapt the code for it
-	Id   int    `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 	Done bool   `json:"done"`
 }
@@ -64,7 +64,9 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	var indexToDelete int
 	for ind, todo := range todos {
-		if todo.Id == todoIdInt {
+		todoIdx, _ := strconv.Atoi(todo.Id)
+
+		if todoIdx == todoIdInt {
 			indexToDelete = ind // this is the index which has to be deleted from the list
 			break
 		}
@@ -72,8 +74,8 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	var newTodoList []Todo
 	newTodoList = todos[:indexToDelete] //appending the list of todos to a new list excluding the one to be deleted
 	newTodoList = append(newTodoList, todos[(indexToDelete+1):]...)
-	_ = TodoCreateHelper(newTodoList[1:])      //inserting new list of todos into csv
-	json.NewEncoder(w).Encode(newTodoList[1:]) //returning response
+	_ = TodoCreateHelper(newTodoList)      //inserting new list of todos into csv
+	json.NewEncoder(w).Encode(newTodoList) //returning response
 }
 
 func UpdateTodo(w http.ResponseWriter, h *http.Request) {
@@ -82,23 +84,14 @@ func UpdateTodo(w http.ResponseWriter, h *http.Request) {
 	var request Todo
 	json.NewDecoder(h.Body).Decode(&request) // Decode the request body to find the todo id
 	todos := GetAllTodosHelper()             // get all todos in the file
-	var isPresent bool
-	var indexToUpdate int
 
 	for ind, todo := range todos {
-
 		if todo.Id == request.Id {
-			isPresent = true
-			indexToUpdate = ind // Finding the index of the todo which needs to be updated
-			break
+			todos[ind].Done = request.Done
 		}
 	}
-	if isPresent {
-		todos[indexToUpdate].Done = request.Done //updating the desired status
-		_ = TodoCreateHelper(todos[1:])          // recreating the list of todos into the file
-		json.NewEncoder(w).Encode(todos[1:])     // returning the updated todos to the response
-	}
 
+	json.NewEncoder(w).Encode(todos) // sending response of all todos in the file
 	//log.WithFields(log.Fields{"Id": id, "Completed": completed}).Info("Updating TodoItem")
 }
 
@@ -111,13 +104,13 @@ func PostTodo(w http.ResponseWriter, h *http.Request) {
 	if lastInd < 0 {
 		lastInd = 0
 	}
-	newId := todos[lastInd].Id + 1 // find the id for the new todo
+	newId, _ := strconv.Atoi(todos[lastInd].Id) // find the id for the new todo
 	var request Todo
 	json.NewDecoder(h.Body).Decode(&request) // decoding the request to get the data
-	request.Id = newId
+	request.Id = strconv.Itoa(newId + 1)
 	todos = append(todos, request)
-	_ = TodoCreateHelper(todos[1:])      // creating the new todo and adding it to file
-	json.NewEncoder(w).Encode(todos[1:]) // sending response of all todos in the file
+	_ = TodoCreateHelper(todos)      // creating the new todo and adding it to file
+	json.NewEncoder(w).Encode(todos) // sending response of all todos in the file
 
 }
 
@@ -158,7 +151,7 @@ func GetAllTodos(w http.ResponseWriter, h *http.Request) {
 	handlers.AllowedOrigins([]string{"*"})             // cors policy
 
 	todos := GetAllTodosHelper() // Get all todos inside the file
-	newTodos := todos[1:]
+	newTodos := todos
 	json.NewEncoder(w).Encode(newTodos)
 
 }
@@ -176,14 +169,14 @@ func GetAllTodosHelper() []Todo {
 	for _, str := range data {
 
 		var todo Todo
-		todo.Id, _ = strconv.Atoi(str[0])        // converts type  string to int
+		todo.Id = str[0]                         // converts type  string to int
 		todo.Name = str[1]                       //noooo
 		todo.Done, _ = strconv.ParseBool(str[2]) // returns the bool value represented by string
 		todaArr = append(todaArr, todo)
 	}
 
 	// converts all the multi-dimensional array contents to struct and returns it
-	return todaArr
+	return todaArr[1:]
 
 }
 
