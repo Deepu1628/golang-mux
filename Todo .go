@@ -95,6 +95,8 @@ func UpdateTodo(w http.ResponseWriter, h *http.Request) {
 	//log.WithFields(log.Fields{"Id": id, "Completed": completed}).Info("Updating TodoItem")
 }
 
+// hello
+
 func PostTodo(w http.ResponseWriter, h *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	handlers.AllowedOrigins([]string{"*"})
