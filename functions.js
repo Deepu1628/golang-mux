@@ -77,7 +77,7 @@ function updateListe(data) {
       let completedClass = ''
       let checkboxChecked = ''
 
-      if (data[i]['done'] == "true") {
+      if ((data[i]['done'] == "true") || (data[i]['done'] == true)) {
           completedClass = "done text-muted"
           checkboxChecked = 'checked="checked"'
       }
@@ -103,6 +103,9 @@ function loadTodos() {
   $.ajax({
           url: API_URL + "/todos",
           crossDomain: true,
+          method: "GET",
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
       })
       .done(function(data) {
           updateListe(data)
