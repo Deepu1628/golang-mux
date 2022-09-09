@@ -57,7 +57,7 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	todoId := mux.Vars(r)["todo_id"]                   //get todo id from url
 	todoIdInt, _ := strconv.Atoi(todoId)               // convert the todo id to int
 	todos := GetAllTodosHelper()                       // this function returns all todos in the file
-	//todos = todos[1:]                                  // i tell just leave 0 and start from 1
+	todos = todos[1:]                                  // i tell just leave 0 and start from 1
 	for _, todo := range todos {
 		fmt.Printf("%+v\n", todo)
 
